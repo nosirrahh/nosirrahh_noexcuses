@@ -17,7 +17,7 @@ public class Tower : MonoBehaviour
 
     #region Fields
 
-    public int damage;
+    public uint damage;
     public float firerate;
     public float range;
     public Projectile projectile;
@@ -97,7 +97,12 @@ public class Tower : MonoBehaviour
                 if (colliders != null && colliders.Length > 0)
                 {
                     for (int i = 0; i < colliders.Length && target == null; i++)
+                    {
                         target = colliders[i].GetComponent<Enemy> ();
+                        if (target != null && target.state == Enemy.EnemyState.Dying)
+                            target = null;
+                    }
+                        
                 }
                 else
                 {
@@ -114,7 +119,7 @@ public class Tower : MonoBehaviour
         while (state == TowerState.Attacking)
         {
             Debug.Log ("[Tower] Attacking: " + name);
-            if (target == null)
+            if (target == null || target.state == Enemy.EnemyState.Dying)
             {
                 ChangeState (TowerState.SearchingTarget);
             }

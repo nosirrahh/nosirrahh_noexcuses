@@ -21,7 +21,7 @@ public class Projectile : MonoBehaviour
     public float speed = 10F;
     
     private Enemy target;
-    private int damage;
+    private uint damage;
     private ProjectileState state;
 
     #endregion
@@ -43,8 +43,14 @@ public class Projectile : MonoBehaviour
 
     private void OnTriggerEnter (Collider other)
     {
+        if (state != ProjectileState.SeekingTarget)
+            return;
+
         if (other.transform == target.transform)
         {
+            Enemy e = target.GetComponent<Enemy> ();
+            if (e != null)
+                e.RemoveHealth (damage);
             ChangeState (ProjectileState.Destroying);
         }
     }
@@ -53,7 +59,7 @@ public class Projectile : MonoBehaviour
 
     #region Public Methods
 
-    public void BuildProjectile (Enemy target, int damage)
+    public void BuildProjectile (Enemy target, uint damage)
     {
         this.target = target;
         this.damage = damage;
