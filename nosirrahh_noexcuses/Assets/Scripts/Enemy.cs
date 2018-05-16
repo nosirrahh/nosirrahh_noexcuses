@@ -85,7 +85,11 @@ public class Enemy : MonoBehaviour
         {
             currentPathPoint++;
             if (currentPathPoint >= path.Count)
-                ChangeState (EnemyState.Idle);
+            {
+                GameManager.Instance.RemoveHealth (damage);
+                ChangeState (EnemyState.Dying);
+            }
+                
         }
     }
 }
