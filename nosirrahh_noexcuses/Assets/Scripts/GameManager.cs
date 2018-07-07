@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Health))]
 public class GameManager : MonoBehaviour
 {
     #region Singleton
@@ -21,8 +22,12 @@ public class GameManager : MonoBehaviour
 
     #region Fields
 
-    public float health = 100;
-    public float currentHealth;
+    public int initialCurrency = 100;
+    public int currentCurrency;
+    
+    public Health health;
+    public Path path;
+    public EnemySpawner enemySpawner;
 
     #endregion
 
@@ -30,19 +35,52 @@ public class GameManager : MonoBehaviour
 
     public void Awake ()
     {
-        currentHealth = health;
+        health = GetComponent<Health> ();
+        health.OnHealthChange += HandleOnHealthChange;
+    }
+    
+    public void Start ()
+    {
+        currentCurrency = initialCurrency;
+        enemySpawner.StartSpawn ();
     }
 
     #endregion
 
     #region Public Methods
 
-    public void RemoveHealth (uint healhToRemove)
+    public void AddCurrency (int currencyToAdd)
     {
-        health -= healhToRemove;
-        if (health <= 0)
+        currentCurrency += Mathf.Abs (currencyToAdd);
+    }
+
+    public bool RemoveCurrency (int currencyToRemove)
+    {
+        currencyToRemove = Mathf.Abs (currencyToRemove);
+        if (currentCurrency - currencyToRemove < 0)
         {
-            Debug.Log ("[GameManager] Você perdeu!");
+            Debug.Log ("[GameManager] (RemoveCurrenty) Não possui a quantidade suficiente de dinheiro para a ação.");
+            return false;
+        }
+
+        currentCurrency -= currencyToRemove;
+        return true;
+    }
+
+    public void RemoveHealth (uint healthToRemove)
+    {
+        health.RemoveHealth (healthToRemove);
+    }
+
+    #endregion
+
+    #region Health Events Handlers
+
+    private void HandleOnHealthChange (Health.HealthEvent eventData)
+    {
+        if (eventData.currentHealth <= 0)
+        {
+            Debug.Log ("[GameManager] (HandleOnHealthChange) A VIDA CHEGOU A ZERO!");
         }
     }
 

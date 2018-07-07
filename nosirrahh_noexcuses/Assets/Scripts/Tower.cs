@@ -17,6 +17,7 @@ public class Tower : MonoBehaviour
 
     #region Fields
 
+    public int price;
     public uint damage;
     public float firerate;
     public float range;
@@ -86,7 +87,6 @@ public class Tower : MonoBehaviour
     {
         while (state == TowerState.SearchingTarget)
         {
-            Debug.Log ("[Tower] SearchingTarget: " + name);
             if (target != null)
             {
                 ChangeState (TowerState.Attacking);
@@ -118,7 +118,6 @@ public class Tower : MonoBehaviour
     {
         while (state == TowerState.Attacking)
         {
-            Debug.Log ("[Tower] Attacking: " + name);
             if (target == null || target.state == Enemy.EnemyState.Dying)
             {
                 ChangeState (TowerState.SearchingTarget);
@@ -131,7 +130,7 @@ public class Tower : MonoBehaviour
             else
             {
                 Projectile p = Instantiate (projectile, transform.position, Quaternion.identity);
-                p.BuildProjectile (target, damage);
+                p.BuildProjectile (target.gameObject, damage);
                 yield return new WaitForSecondsRealtime (firerate);
             }
         }

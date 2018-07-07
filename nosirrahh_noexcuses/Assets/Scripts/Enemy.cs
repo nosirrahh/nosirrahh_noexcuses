@@ -2,34 +2,62 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Health))]
 public class Enemy : MonoBehaviour
 {
+    #region Enumeration
+
     public enum EnemyState
     {
         None,
         Idle,
         Moving,
-        Dying
+        Dying,
+        ReachTarget
     }
 
-    public float health = 100;
+    #endregion
+
+    #region Fields
+    
     public float speed = 1;
     public uint damage = 1;
+    public int worth;
 
     public float pathPointThreshold = 0.5F;
     public int currentPathPoint;
     public List<Transform> path;
     public EnemyState state;
-    
+    public Health health;
+
+    #endregion
+
+    #region Unity Methods
+
     private void Awake ()
     {
         ChangeState (EnemyState.Moving);
+        health = GetComponent<Health> ();
+        health.OnHealthChange += HandleOnHealthChange;
     }
 
+    private void OnDestroy ()
+    {
+        health.OnHealthChange -= HandleOnHealthChange;
+    }
+    
     private void Update ()
     {
         Move ();
     }
+
+    #endregion
+
+    #region Public Methods
+    
+    #endregion
+
+    #region Private Methods
 
     private void ChangeState (EnemyState toState)
     {
@@ -45,23 +73,22 @@ public class Enemy : MonoBehaviour
             case EnemyState.Idle:
                 break;
             case EnemyState.Moving:
+                path = GameManager.Instance.path.path;
                 currentPathPoint = 0;
                 if (path == null || path.Count == 0)
                     ChangeState (EnemyState.Idle);
                 break;
             case EnemyState.Dying:
+                GameManager.Instance.AddCurrency (worth);
+                Destroy (gameObject);
+                break;
+            case EnemyState.ReachTarget:
+                GameManager.Instance.RemoveHealth (damage);
                 Destroy (gameObject);
                 break;
             default:
                 break;
         }
-    }
-
-    public void RemoveHealth (uint healhToRemove)
-    {
-        health -= healhToRemove;
-        if (health <= 0)
-            ChangeState (EnemyState.Dying);
     }
 
     private void Move ()
@@ -86,10 +113,23 @@ public class Enemy : MonoBehaviour
             currentPathPoint++;
             if (currentPathPoint >= path.Count)
             {
-                GameManager.Instance.RemoveHealth (damage);
-                ChangeState (EnemyState.Dying);
+                ChangeState (EnemyState.ReachTarget);
             }
-                
+
         }
     }
+
+    #endregion
+
+    #region Health Events Handlers
+
+    private void HandleOnHealthChange (Health.HealthEvent eventData)
+    {
+        if (eventData.currentHealth <= 0)
+        {
+            ChangeState (EnemyState.Dying);
+        }
+    }
+
+    #endregion
 }

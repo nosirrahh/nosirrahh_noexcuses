@@ -20,7 +20,7 @@ public class Projectile : MonoBehaviour
 
     public float speed = 10F;
     
-    private Enemy target;
+    private GameObject target;
     private uint damage;
     private ProjectileState state;
 
@@ -48,9 +48,10 @@ public class Projectile : MonoBehaviour
 
         if (other.transform == target.transform)
         {
-            Enemy e = target.GetComponent<Enemy> ();
-            if (e != null)
-                e.RemoveHealth (damage);
+            Health h = target.GetComponent<Health> ();
+            if (h != null)
+                h.RemoveHealth (damage);
+            
             ChangeState (ProjectileState.Destroying);
         }
     }
@@ -59,7 +60,7 @@ public class Projectile : MonoBehaviour
 
     #region Public Methods
 
-    public void BuildProjectile (Enemy target, uint damage)
+    public void BuildProjectile (GameObject target, uint damage)
     {
         this.target = target;
         this.damage = damage;
